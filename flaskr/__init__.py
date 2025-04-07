@@ -12,7 +12,7 @@ def create_app():
     app.config['DEBUG'] = True
     app.config['MONGO_URI'] = config['PROD']['DB_URI']
     app.config['DB_NAME'] = config['PROD']['DB_NAME']
-    
+    app.config['SECRET_KEY'] = config['PROD']['SECRET_KEY']
     app.config['JWT_SECRET_KEY'] = config['PROD']['JWT_SECRET_KEY']
 
     from . import db
@@ -20,5 +20,8 @@ def create_app():
     
     from . import auth
     app.register_blueprint(auth.bp)
+
+    from . import dashboard
+    app.register_blueprint(dashboard.bp)
 
     return app
