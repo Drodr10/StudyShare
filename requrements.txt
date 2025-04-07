@@ -5,3 +5,4 @@ pytest-cov
 PyJWT
 Werkzeug
 configparser
+python-dotenv

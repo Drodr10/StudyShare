@@ -4,6 +4,7 @@
 __pycache__/
 
 .ini
+.env
 
 .pytest_cache/
 .coverage

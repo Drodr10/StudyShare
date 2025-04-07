@@ -1,7 +1,9 @@
 from flask import Flask
-
+from dotenv import load_dotenv
 import os
 import configparser
+
+load_dotenv()  # Load environment variables from .env file
 
 config = configparser.ConfigParser()
 base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # Get the StudyShare directory
@@ -12,8 +14,10 @@ def create_app():
     app.config['DEBUG'] = True
     app.config['MONGO_URI'] = config['PROD']['DB_URI']
     app.config['DB_NAME'] = config['PROD']['DB_NAME']
-    app.config['SECRET_KEY'] = config['PROD']['SECRET_KEY']
-    app.config['JWT_SECRET_KEY'] = config['PROD']['JWT_SECRET_KEY']
+    
+    # Set the secret keys from environment variables
+    app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
+    app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
 
     from . import db
     db.init_app(app)
