@@ -1,3 +1,7 @@
 Flask
 pymongo[srv]
-Flask-PyMongo
+pytest
+pytest-cov
+PyJWT
+Werkzeug
+configparser
