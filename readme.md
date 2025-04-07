@@ -50,11 +50,16 @@ StudyShare is a collaborative platform for students and learners to share and co
     [PROD]
     DB_URI = mongodb://localhost:27017
     DB_NAME = studyshare
-    JWT_SECRET_KEY = your_jwt_secret_key
-    SECRET_KEY = your_flask_secret_key
     ```
 
-    Replace `your_jwt_secret_key` and `your_flask_secret_key` with strong, randomly generated keys. You can generate them using Python:
+    - Create a `.env` file in the root directory with the following structure:
+
+    ```env
+    JWT_SECRET_KEY=your_shared_jwt_secret_key
+    SECRET_KEY=your_shared_flask_secret_key
+    ```
+
+    Replace `your_shared_jwt_secret_key` and `your_shared_flask_secret_key` with strong, randomly generated keys. You can generate them using Python:
 
     ```python
     import secrets
