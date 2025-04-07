@@ -22,6 +22,7 @@ def close_db(e=None):
     """
     Close the database connection
     """
+    g.pop('db', None)
     client = g.pop('client', None)
 
     if client is not None:
@@ -79,10 +80,15 @@ def init_db():
     db.categories.create_index([('name', 1)], unique=True)
     
 @click.command('init-db')
-def init_db_command():
+@click.option('--test', is_flag=True, help="Initialize the test database instead of the production database.")
+def init_db_command(test):
     """
     Command line interface to initialize the database
     """
+    if test:
+        current_app.config['MONGO_URI'] = 'mongodb://localhost:27017/test_studyshare'
+        current_app.config['DB_NAME'] = 'test_studyshare'
+    
     init_db()
     click.echo('Initialized the database.')
     
