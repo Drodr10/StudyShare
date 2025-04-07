@@ -1,15 +1,21 @@
 import functools
 import re
-import jwt
 import datetime
+import jwt
 
 from flask import Blueprint, request, jsonify, current_app, redirect, url_for, session
 from .db import get_db
 from werkzeug.security import generate_password_hash, check_password_hash
-
+from pymongo.errors import DuplicateKeyError
 
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
+
+def redirect_to_login():
+    return redirect(url_for('auth.login'))
+
+def redirect_to_registration():
+    return redirect(url_for('auth.register'))
 
 @bp.route('/login', methods=('POST',))
 def login():
@@ -22,7 +28,7 @@ def login():
     password = request.form.get('password')
     
     if not username or not password:
-        return jsonify({"message": "Please provide username and password"}), 400
+        return redirect_to_login()  # Redirect back to the login page
     
     # Make sure the user exists
     user = db.users.find_one({"username": username})
@@ -32,11 +38,14 @@ def login():
         token = jwt.encode({
             "username": username,
             "exp": datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=1)
-        }, current_app.config['SECRET_KEY'], algorithm='HS256')
+        }, current_app.config['JWT_SECRET_KEY'], algorithm='HS256')
         
-        return jsonify({"message": "Login successful", "token": token}), 200
+        # Store the token in the session
+        session['jwt_token'] = token
+        return redirect(url_for('dashboard.index'))
     else:
-        return jsonify({"message": "Invalid username or password"}), 401
+        return redirect_to_login() 
+
     
 @bp.route('/register', methods=('POST',))
 def register():
@@ -49,24 +58,11 @@ def register():
     email = request.form.get('email')
     password = request.form.get('password')
     
-    if not username or not email or not password:
-        return jsonify({"message": "Please provide username, email, and password"}), 400
-    
-    if not re.match(r"^\w+$", username):
-        return jsonify({"message": "Username can only contain letters, numbers, and underscores"}), 400
-    
-    if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
-        return jsonify({"message": "Invalid email address"}), 400
-    
-    if len(password) < 8:
-        return jsonify({"message": "Password must be at least 8 characters long"}), 400
-    
-    # Check if the user already exists
-    if db.users.find_one({"username": username}):
-        return jsonify({"message": "Username already exists"}), 409
-    
-    if db.users.find_one({"email": email}):
-        return jsonify({"message": "Email already exists"}), 409
+    if not all([username, email, password]) or \
+       not re.match(r"^\w+$", username) or \
+       not re.match(r"[^@]+@[^@]+\.[^@]+", email) or \
+       len(password) < 8:
+        return redirect_to_registration()
     
     # Hash the password and store the user in the database
     hashed_password = generate_password_hash(password)
@@ -77,17 +73,19 @@ def register():
             "email": email,
             "password": hashed_password
         })
+    except DuplicateKeyError as e:
+        if "username" in str(e) or "email" in str(e):
+            return redirect_to_registration()
     except Exception as e:
-        return jsonify({"message": "Error registering user", "error": str(e)}), 500
-
-    # Verification email? Maybe later
+        return redirect_to_registration()
     
-    return jsonify({"message": "User registered successfully"}), 201
+    return redirect_to_login() 
 
 @bp.route('/logout', methods=('POST',))
 def logout():
     """
     Logout a user.
     """
-    # Invalidate the JWT token (this can be done by adding it to a blacklist)
-    return jsonify({"message": "Logout successful"}), 200
+    
+    session.clear()
+    return redirect_to_login()
