@@ -60,6 +60,7 @@ def login():
             session['jwt_token'] = token
             session['username'] = username
             session['user_id'] = str(user['_id'])
+            session['logged_in'] = True
             return redirect(url_for('dashboard.index'))
         
         flash(error) 
@@ -120,10 +121,21 @@ def load_logged_in_user():
     if user_id is None:
         g.user = None
     else:
-        db = get_db()
-        g.user = db.users.find_one({"_id": user_id})
+        if 'user_data' in session:
+            g.user = session['user_data']
+        else:
+            db = get_db()
+            g.user = db.users.find_one({"_id": user_id})
+            if g.user:
+                session['user_data'] = {
+                    'username': g.user['username'],
+                    'email': g.user['email'],
+                    'user_id': str(g.user['_id'])
+                }
+            else:
+                g.user = None
 
-@bp.route('/logout', methods=('POST',))
+@bp.route('/logout')
 def logout():
     """
     Logout a user.
