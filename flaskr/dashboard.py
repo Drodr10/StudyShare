@@ -1,4 +1,4 @@
-from flask import Blueprint
+from flask import Blueprint, render_template
 
 bp = Blueprint('dashboard', __name__, url_prefix='/dashboard')
 
@@ -7,4 +7,5 @@ def index():
     """
     Dashboard page for logged-in users.
     """
-    return "Welcome to your dashboard!"
+    return render_template('base.html')
+
