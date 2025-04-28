@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}Posts{% endblock %}</h1>
+  {% if g.user %}
+    <a class="action" href="{{ url_for('post.create') }}">New</a>
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+    {% if posts %}
+        <ul class="posts">
+        {% for post in posts %}
+            <li>
+                <h3><a href="{{ url_for('post.show', post_id=post.id) }}">{{ post.title }}</a></h3>
+                <p>{{ post.body }}</p>
+                {% if g.user and g.user.id == post.author_id %}
+                    <a class="action" href="{{ url_for('post.edit', post_id=post.id) }}">Edit</a>
+                    <a class="action" href="{{ url_for('post.delete', post_id=post.id) }}">Delete</a>
+                {% endif %}
+            </li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>No posts yet. Be the first to create one!</p>
+    {% endif %}
+{% endblock %}
