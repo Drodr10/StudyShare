@@ -33,15 +33,16 @@ def login():
         
         if not username or not password:
             error = "Enter username and password."
-                    
-        # Make sure the user exists
-        user = db.users.find_one({"username": username})
         
-        if user is None:
-            error = "Incorrect username."
+        else:
+            # Make sure the user exists
+            user = db.users.find_one({"username": username})
             
-        elif not check_password_hash(user['password'], password):
-            error = "Incorrect password."
+            if user is None:
+                error = "Incorrect username."
+                
+            elif not check_password_hash(user['password'], password):
+                error = "Incorrect password."
             
         
         if error is None:
@@ -84,7 +85,7 @@ def register():
         
         if not all([username, email, password]): 
             error = "Enter username, email, and password."
-        elif re.match(r"[\W]+$", username) :
+        elif not re.match(r"^\w+$", username) :
             error = "Username can only contain characters, numbers, and underscores."
         elif not re.match(r"[^@]+@[^@]+\.[^@]+", email) :
             error = "Invalid email!"
@@ -171,4 +172,3 @@ def login_required(view):
         # If the token is valid, proceed to the view
         return view(*args, **kwargs)
     return wrapped_view
-
