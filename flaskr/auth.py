@@ -7,6 +7,7 @@ from flask import Blueprint, g, request, render_template, current_app, redirect,
 from .db import get_db
 from werkzeug.security import generate_password_hash, check_password_hash
 from pymongo.errors import DuplicateKeyError
+from markupsafe import escape
 
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
@@ -25,8 +26,8 @@ def login():
     if request.method == 'POST':
         db = get_db()
         
-        username = request.form.get('username')
-        password = request.form.get('password')
+        username = escape(request.form.get('username'))
+        password = escape(request.form.get('password'))
         
         error = None
         
@@ -77,9 +78,9 @@ def register():
         db = get_db()
         error = None
         
-        username = request.form.get('username')
-        email = request.form.get('email')
-        password = request.form.get('password')
+        username = escape(request.form.get('username'))
+        email = escape(request.form.get('email'))
+        password = escape(request.form.get('password'))
         
         if not all([username, email, password]): 
             error = "Enter username, email, and password."
