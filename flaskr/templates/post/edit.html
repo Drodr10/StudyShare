@@ -17,7 +17,7 @@
         </option>
       {% endfor %}
     </select>
-    <label for="tags">Tags</label>
+    <label for="tags">Tags (comma seperated)</label>
     <input name="tags" id="tags" value="{{ request.form['tags'] or ', '.join(post['tags']) }}">
     <label for="content">Content</label>
     <textarea name="content" id="content">{{ request.form['content'] or post['content'] }}</textarea>
@@ -27,4 +27,5 @@
   <form action="{{ url_for('post.delete', post_id=post['id']) }}" method="post">
     <input class="danger" type="submit" value="Delete" onclick="return confirm('Are you sure?');">
   </form>
+  <p><a href="{{ url_for('post.index') }}">Back to posts</a></p>
 {% endblock %}
