@@ -30,6 +30,6 @@ def create_app():
     
     from . import post
     app.register_blueprint(post.bp)
-    app.add_url_rule('/', endpoint='index')
+    app.add_url_rule('/', endpoint='post.index')
 
     return app
