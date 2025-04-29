@@ -144,3 +144,94 @@ ul.posts p {
     gap:10px;
   }
 }
+
+/* Existing styles remain unchanged above... */
+
+/* === Form Styling === */
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+
+label {
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+input:not([type="image" i], [type="range" i], [type="checkbox" i], [type="radio" i]),
+input[type="text"],
+input[type="submit"],
+input[type="url"],
+input[type="email"],
+select,
+textarea {
+  font: inherit;
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #fff;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  width: 100%;
+  max-width: 100%;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: #0077cc;
+  box-shadow: 0 0 0 3px rgba(0, 119, 204, 0.1);
+}
+
+textarea {
+  min-height: 180px;
+  resize: vertical;
+}
+
+
+input[type="submit"] {
+  background-color: #0077cc;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  width: fit-content;
+  padding: 10px 20px;
+  align-self: flex-start;
+  transition: background-color 0.2s ease;
+}
+
+input[type="submit"]:hover {
+  background-color: #005fa3;
+}
+
+input.danger {
+  background-color: #dc3545;
+}
+
+input.danger:hover {
+  background-color: #b02a37;
+}
+
+/* Divider line for visual separation */
+hr {
+  margin: 30px 0;
+  border: none;
+  border-top: 1px solid #ddd;
+}
+
+/* Mobile Form Layout Improvements */
+@media (max-width: 600px) {
+  form {
+    gap: 14px;
+  }
+
+  input[type="submit"] {
+    width: 100%;
+  }
+}
