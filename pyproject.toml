@@ -1,0 +1,40 @@
+[project]
+name = "studyshare"
+version = "1.0.0"
+authors = [
+  { name = "Diego Rodriguez", email="diegor010206@gmail.com" },
+  { name = "Xavier Ruiz", email = "example@email.com" }
+]
+description = "The note sharing app for Markdown (.md) files!"
+readme = "README.md"
+dependencies = [
+  "Flask",
+  "pymongo[srv]",
+  "pytest",
+  "pytest-cov",
+  "PyJWT",
+  "Werkzeug",
+  "configparser",
+  "python-dotenv"
+]
+requires-python = ">=3.8"
+
+license = "MIT"
+
+[project.urls]
+Repository = "https://github.com/Drodr10/StudyShare"
+
+[tool.flask]
+app = "flaskr:create_app"
+debug = true
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "--cov=flaskr --cov-report=term-missing"
+testpaths = [
+  "tests"
+]
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
