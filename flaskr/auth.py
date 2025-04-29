@@ -36,7 +36,9 @@ def login():
         
         else:
             # Make sure the user exists
-            user = db.users.find_one({"username": username})
+            user = db.users.find_one({"$or": [
+                {"username": {"$regex": f"^{username}$", "$options": "i"}},
+                {"email": {"$regex": f"^{username}$", "$options": "i"}}]})
             
             if user is None:
                 error = "Incorrect username."
@@ -47,7 +49,7 @@ def login():
         
         if error is None:
             # Check if the user is already logged in
-            if session.get('username') == username:
+            if session.get('username') == username or session.get('email') == username:
                 flash("You are already logged in.")
                 return redirect(url_for('dashboard.index'))
             
@@ -60,12 +62,12 @@ def login():
             # Store the token in the session
             session.clear()
             session['jwt_token'] = token
-            session['username'] = username
+            session['username'] = user['username']
             session['user_id'] = str(user['_id'])
             session['logged_in'] = True
             return redirect(url_for('dashboard.index'))
         
-        flash(error) 
+        flash(error)
         
     return render_template('auth/login.html')
 
@@ -85,31 +87,38 @@ def register():
         
         if not all([username, email, password]): 
             error = "Enter username, email, and password."
-        elif not re.match(r"^\w+$", username) :
+        elif not re.match(r"^\w+$", username):
             error = "Username can only contain characters, numbers, and underscores."
-        elif not re.match(r"[^@]+@[^@]+\.[^@]+", email) :
+        elif not re.match(r"[^@]+@[^@]+\.[^@]+", email):
             error = "Invalid email!"
         elif len(password) < 8:
             error = "Password must be longer than 7 characters."
         
-        # Hash the password and store the user in the database
-        hashed_password = generate_password_hash(password)
         if error is None:
+            # Check if username or email already exists (case-insensitive)
+            existing_user = db.users.find_one({
+                "$or": [
+                    {"username": {"$regex": f"^{username}$", "$options": "i"}},
+                    {"email": {"$regex": f"^{email}$", "$options": "i"}}
+                ]
+            })
+            if existing_user:
+                error = "Username or email already exists."
+        
+        # Hash the password and store the user in the database
+        if error is None:
+            hashed_password = generate_password_hash(password)
             try:
                 db.users.insert_one({
                     "username": username,
                     "email": email,
                     "password": hashed_password
                 })
-            except DuplicateKeyError as e:
-                if "username" in str(e) or "email" in str(e):
-                    error = "Username or email already exists."
-                else:
-                    error = "An unknown error occurred."
             except Exception as e:
                 error = "An unknown error occurred."
             else:
                 return redirect_to_login()
+        
         flash(error)
         
     return render_template('auth/register.html')
