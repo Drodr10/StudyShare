@@ -114,7 +114,7 @@ def register():
                     "email": email,
                     "password": hashed_password
                 })
-            except Exception as e:
+            except Exception:
                 error = "An unknown error occurred."
             else:
                 return redirect_to_login()
