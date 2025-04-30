@@ -101,6 +101,21 @@ section.content .action:hover {
   background-color: #218838;
 }
 
+section.content .edit {
+  background-color: #0077cc
+}
+
+section.content .edit:hover {
+  background-color: #005fa3;
+}
+
+section.content .delete {
+  background-color: #dc3545;
+}
+section.content .delete:hover {
+  background-color: #b02a37;
+}
+
 /* Post List */
 ul.posts {
   display: flex;
