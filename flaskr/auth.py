@@ -167,9 +167,11 @@ def login_required(view):
                 jwt.decode(token, current_app.config['JWT_SECRET_KEY'], algorithms=['HS256'])
             except jwt.ExpiredSignatureError:
                 flash("Your session has expired. Please log in again.")
+                session.clear()
                 return redirect_to_login()
             except jwt.InvalidTokenError:
                 flash("Invalid token. Please log in again.")
+                session.clear()
                 return redirect_to_login()
         
         # If the token is valid, proceed to the view
