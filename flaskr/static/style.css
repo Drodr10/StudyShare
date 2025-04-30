@@ -229,8 +229,20 @@ input[type="submit"] {
   transition: background-color 0.2s ease;
 }
 
-input[type="submit"]:hover {
+input[type="submit"][value="Save"] {
+  background-color: #0077cc;
+}
+
+input[type="submit"][value="Save"]:hover {
   background-color: #005fa3;
+}
+
+input[type="submit"][value="Back"] {
+  background-color: #6c757d;
+}
+
+input[type="submit"][value="Back"]:hover {
+  background-color: #5a6268;
 }
 
 input.danger {

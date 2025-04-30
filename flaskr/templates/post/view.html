@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block header %}
+    <h1>{{ post['title'] }}</h1>
+{% endblock %}
+
+{% block content %}
+    <p>{{ post['content'] }}</p>
+    <p><strong>Category:</strong> {{ post['category'] }}</p>
+    <p><strong>Tags:</strong> {{ post['tags'] | join(', ') }}</p>
+    <p><strong>Created At:</strong> {{ post['created_at'] }}</p>
+    <p><strong>Updated At:</strong> {{ post['updated_at'] }}</p>
+    </form>
+    <hr>
+    <form action="{{ url_for('post.index') }}" method="get" style="margin: 0;">
+    <input type="submit" value="Back">
+    </form>
+{% endblock %}

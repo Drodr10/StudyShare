@@ -100,25 +100,39 @@ def index():
                            search_category=search_category,
                            categories=list(db.categories.find()))
 
+@bp.route('/<post_id>/view', methods=('GET',))
+@login_required
+def view(post_id):
+    """
+    View a specific post by its ID, but only if it was not created by the current user.
+    """
+    db = get_db()
+    post = db.posts.find_one({'_id': ObjectId(post_id)})
+
+    if post is None:
+        abort(404, f"Post id {post_id} doesn't exist.")
+        
+    return render_template('post/view.html', post=serialize_post(post))
+
 @bp.route('/create', methods=('GET', 'POST'))
 @login_required
 def create():
+    db = get_db()
     if request.method == 'POST':
         title = request.form['title']
-        body = request.form['body']
+        content  = request.form['content']
         error = None
 
         if not title:
             error = 'Title is required.'
-
         if error is not None:
             flash(error)
         else:
             now = datetime.now(timezone.utc)
-            db = get_db()
+            now = now.astimezone().strftime('%Y-%m-%d %H:%M:%S %Z')
             db.posts.insert_one({
                 'title': title,
-                'content': body,
+                'content': content,
                 'category': request.form.get('category', 'Uncategorized'),
                 'creator_id': g.user['user_id'],  
                 'created_at': now,
@@ -130,15 +144,14 @@ def create():
             flash('Post created successfully.')
             return redirect(url_for('post.index'))
 
-    return render_template('post/create.html')
+    return render_template('post/create.html', categories=list(db.categories.find()))
 
 @bp.route('/<post_id>/edit', methods=('GET', 'POST'))
 @login_required
 def edit(post_id):
     db = get_db()
     post = db.posts.find_one({'_id': ObjectId(post_id)})
-    categories = list(db.categories.find())
-
+    
     if post is None:
         abort(404, f"Post id {post_id} doesn't exist.")
     if post['creator_id'] != g.user['user_id']:
@@ -150,6 +163,8 @@ def edit(post_id):
         category = request.form['category']
         tags = request.form['tags'].split(',')
         
+        now = datetime.now(timezone.utc)
+        now = now.astimezone().strftime('%Y-%m-%d %H:%M:%S %Z')
         db.posts.update_one(
             {'_id': ObjectId(post_id)},
             {'$set': {
@@ -157,12 +172,12 @@ def edit(post_id):
                 'content': content,
                 'category': category,
                 'tags': [tag.strip() for tag in tags],
-                'updated_at': datetime.now(timezone.utc)
+                'updated_at': now
             }}
         )
         flash('Post updated successfully.')
         return redirect(url_for('post.index'))
-    return render_template('post/edit.html', post=serialize_post(post), categories=categories)
+    return render_template('post/edit.html', post=serialize_post(post), categories=list(db.categories.find()))
 
 @bp.route('/<post_id>/delete', methods=('POST',))
 @login_required

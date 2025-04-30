@@ -47,13 +47,6 @@ def login():
             elif not check_password_hash(user['password'], password):
                 error = "Incorrect password."
             
-        
-        if error is None:
-            # Check if the user is already logged in
-            if session.get('username') == username or session.get('email') == username:
-                flash("You are already logged in.")
-                return redirect(url_for('dashboard.index'))
-            
             # Generate a JWT token
             token = jwt.encode({
                 "username": username,
@@ -66,7 +59,7 @@ def login():
             session['username'] = user['username']
             session['user_id'] = str(user['_id'])
             session['logged_in'] = True
-            return redirect(url_for('dashboard.index'))
+            return redirect(url_for('post.index'))
         
         flash(error)
         
