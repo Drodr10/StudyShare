@@ -8,6 +8,7 @@ from .db import get_db
 from werkzeug.security import generate_password_hash, check_password_hash
 from pymongo.errors import DuplicateKeyError
 from markupsafe import escape
+from bson.objectid import ObjectId
 
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
@@ -136,7 +137,7 @@ def load_logged_in_user():
             g.user = session['user_data']
         else:
             db = get_db()
-            g.user = db.users.find_one({"_id": user_id})
+            g.user = db.users.find_one({"_id": ObjectId(user_id)})
             if g.user:
                 session['user_data'] = {
                     'username': g.user['username'],
