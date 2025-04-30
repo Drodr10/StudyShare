@@ -79,6 +79,32 @@ def init_db():
         print("Created 'categories' collection.")
     
     db.categories.create_index([('name', 1)], unique=True)
+    db.categories.create_index([('description', 1)])
+    
+    categories = [
+        {"name": "General", "description": "General discussions and topics."},
+        {"name": "Technology", "description": "Discussions about technology."},
+        {"name": "Science", "description": "Discussions about science."},
+        {"name": "Health", "description": "Discussions about health."},
+        {"name": "Education", "description": "Discussions about education."},
+        {"name": "Math", "description": "Discussions about math."},
+        {"name": "Physics", "description": "Discussions about physics."},
+        {"name": "Chemistry", "description": "Discussions about chemistry."},
+        {"name": "Biology", "description": "Discussions about biology."},
+        {"name": "History", "description": "Discussions about history."},
+        {"name": "Literature", "description": "Discussions about literature."},
+        {"name": "Art", "description": "Discussions about art."},
+        {"name": "Music", "description": "Discussions about music."},\
+    ]
+    
+    # Insert categories if they don't exist
+    for category in categories:
+        if db.categories.count_documents({"name": category["name"]}) == 0:
+            db.categories.insert_one(category)
+            print(f"Inserted category: {category['name']}")
+        else:
+            print(f"Category {category['name']} already exists.")
+    
     
 @click.command('init-db')
 @click.option('--test', is_flag=True, help="Initialize the test database instead of the production database.")
