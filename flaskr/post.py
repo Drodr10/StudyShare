@@ -47,19 +47,35 @@ def index():
     db = get_db()
     posts = None
     
+    final_query = mongo_query.copy()
+    
     if search_sort == 'relevance':
         if search_query:
-            try:
-                mongo_query['$text'] = {'$search': search_query}
+            text_search_query = final_query.copy()
+            # $or condition CANNOT be used with $text search in MongoDB
+            text_search_query.pop('$or', None)  # Remove the $or key if it exists
+            
+            text_search_query['$text'] = {'$search': search_query}
+            
+            try:    
                 posts = db.posts.find(
-                    mongo_query, 
+                    text_search_query, 
                     {'score': {'$meta': 'textScore'}}
                 ).sort([('score', {'$meta': 'textScore'})])
             except Exception as e:
                 flash(f"An error occurred while fetching posts sorted by relevance: {str(e)}")
-                posts = []
+                try:
+                    posts = db.posts.find(mongo_query).sort('created_at', -1)
+                except Exception as e_fallback:
+                    flash(f"An error occurred while fetching posts: {str(e_fallback)}")
+                    posts = []
         else:
-            search_sort = 'created_at'
+            flash("Search query is empty. Defaulting to time sort.")
+            try:
+                posts = db.posts.find(mongo_query).sort('created_at', -1)
+            except Exception as e:
+                flash(f"An error occurred while fetching posts: {str(e)}")
+                posts = []
         
     elif search_sort == 'popularity':
         try:
@@ -76,13 +92,22 @@ def index():
             ])
         except Exception as e:
             flash(f"An error occurred while fetching posts sorted by popularity: {str(e)}")
-            posts = []
+            try:
+                posts = db.posts.find(mongo_query).sort('created_at', -1)
+            except Exception as e_fallback:
+                flash(f"An error occurred while fetching posts: {str(e_fallback)}")
+                posts = []
     
-    if posts is None:
-        sort_field = search_sort if search_sort in ['created_at', 'title'] else 'created_at'
-        sort_order = 1 if sort_field == 'title' else -1
+    elif search_sort in ['title', 'created_at']:
         try:
-            posts = db.posts.find(mongo_query).sort(sort_field, sort_order)
+            posts = db.posts.find(mongo_query).sort(search_sort, -1)
+        except Exception as e:
+            flash(f"An error occurred while fetching posts sorted by {search_sort}: {str(e)}")
+            posts = []
+    else:
+        flash("Invalid sort option. Defaulting to time sort.")
+        try:
+            posts = db.posts.find(mongo_query).sort('created_at', -1)
         except Exception as e:
             flash(f"An error occurred while fetching posts: {str(e)}")
             posts = []
