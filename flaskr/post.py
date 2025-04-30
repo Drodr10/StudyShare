@@ -3,10 +3,11 @@ from werkzeug.exceptions import abort
 from datetime import datetime, timezone
 from bson.objectid import ObjectId
 import re
+import markdown
 
 from flaskr.db import get_db
 from flaskr.auth import login_required
-import logging
+
 
 
 bp = Blueprint('post', __name__, url_prefix='/post')
