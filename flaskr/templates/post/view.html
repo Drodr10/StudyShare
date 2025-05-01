@@ -51,8 +51,7 @@
     {# --- Comment Form --- #}
     <form method="post" action="{{ url_for('post.comment_post', post_id=post['id']) }}">
         <label for="comment" style="display: block; margin-bottom: 5px;">Your Comment:</label>
-        <textarea name="comment" id="comment" required rows="3" style="width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px;" placeholder="Write your comment here...">
-        </textarea>
+        <textarea name="comment" id="comment" required rows="3" style="width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px;" placeholder="Write your comment here..."></textarea>
         <button type="submit" class="action">Comment</button>
     </form>
 
