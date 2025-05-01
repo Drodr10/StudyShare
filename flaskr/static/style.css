@@ -45,6 +45,22 @@ button.action:hover {
   background-color: #005fa3;
 }
 
+button,
+input[type="submit"] {
+    /* --- Make these consistent --- */
+    padding: 8px 16px;        /* Example: Choose consistent padding */
+    border-radius: 6px;       /* Example: Choose consistent radius */
+    font-size: inherit;       /* Use surrounding font size */
+    font-weight: 600;         /* Make text bold consistently */
+    line-height: 1.4;         /* Adjust for consistent height if needed */
+    border: none;             /* Consistent border */
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    box-sizing: border-box;   /* Use border-box for predictable sizing */
+    vertical-align: middle;   /* Helps with alignment when side-by-side */
+    /* --- End of consistent styles --- */
+}
+
 /* Navigation Bar */
 nav {
   display: flex;

@@ -5,11 +5,11 @@
 {% endblock %}
 
 {% block content %}
-  <form method="post">
+  <form method="post" id="edit-form">
     <label for="title">Title</label>
     <input name="title" id="title"
       value="{{ request.form['title'] or post['title'] }}" required>
-    <label for="catgory">Category</label>
+    <label for="category">Category</label>
     <select name="category" id="category">
       {% for category in categories %}
         <option value="{{ category['name'] }}" {% if post['category'] == category['name'] %}selected{% endif %}>
@@ -17,18 +17,27 @@
         </option>
       {% endfor %}
     </select>
-    <label for="tags">Tags (comma seperated)</label>
+    <label for="tags">Tags (comma separated)</label>
     <input name="tags" id="tags" value="{{ request.form['tags'] or ', '.join(post['tags']) }}">
     <label for="content">Content</label>
     <textarea name="content" id="content">{{ request.form['content'] or post['content'] }}</textarea>
-    <div style="display: flex; gap: 10px; align-items: center;">
-      <input type="submit" value="Save">
-      <form action="{{ url_for('post.delete', post_id=post['id']) }}" method="post" style="margin: 0;">
+    
+    <!-- Hidden submit button that will be triggered by the visible button below -->
+    <input type="submit" style="display: none" id="submit-edit">
+  </form>
+  
+  <!-- Button container -->
+  <div style="display: flex; gap: 10px; align-items: center; margin-top: 10px;">
+    <!-- Button that triggers the form submission via JavaScript -->
+    <button type="button" class="action" onclick="document.getElementById('submit-edit').click();" >Save Changes</button>
+    
+    <form action="{{ url_for('post.delete', post_id=post['id']) }}" method="post" style="margin: 0;">
       <input class="danger" type="submit" value="Delete" onclick="return confirm('Are you sure?');">
-      </form>
-    </div>
     </form>
+  </div>
+  
   <hr>
+
   <form action="{{ url_for('post.index') }}" method="get" style="margin: 0;">
     <input type="submit" value="Back">
   </form>
