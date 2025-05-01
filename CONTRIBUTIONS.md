@@ -17,8 +17,6 @@ This file outlines work on tasks not directly reflected in source code commits, 
 * **Date:** April 28-30th, 2025 **Task:** Looked over documentation while creating the project and offered ideas throughout
 to assist with proper execution of the website.
 
-
-
 ## Joint Contributions (Diego Rodriguez & Xavier Ruiz)
 
 * **Date:** Approx. April 18th, 2025 - **Task:** Discussed and redistributed project development tasks following a reduction in team size
