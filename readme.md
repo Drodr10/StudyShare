@@ -49,7 +49,7 @@ StudyShare is a collaborative platform for students and learners to share and co
     ```ini
     [PROD]
     DB_URI = mongodb://localhost:27017
-    DB_NAME = studyshare
+    DB_NAME = test_studyshare
     ```
 
     - Create a `.env` file in the root directory with the following structure:
