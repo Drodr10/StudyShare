@@ -15,7 +15,8 @@ dependencies = [
   "PyJWT",
   "Werkzeug",
   "configparser",
-  "python-dotenv"
+  "python-dotenv",
+  "Markdown",
 ]
 requires-python = ">=3.8"
 

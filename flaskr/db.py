@@ -57,6 +57,9 @@ def init_db():
     db.posts.create_index([('created_at', 1)])
     db.posts.create_index([('updated_at', 1)])
     db.posts.create_index([('tags', 1)])
+    db.posts.create_index([('title', 'text'), ('content', 'text')]) # Full-text search index
+    db.posts.create_index([('likes', 1)])  # For sorting by likes
+    db.posts.create_index([('comments', 1)])  # For sorting by comments
     
     if 'comments' not in db.list_collection_names():
         db.create_collection('comments')
@@ -102,8 +105,6 @@ def init_db():
         if db.categories.count_documents({"name": category["name"]}) == 0:
             db.categories.insert_one(category)
             print(f"Inserted category: {category['name']}")
-        else:
-            print(f"Category {category['name']} already exists.")
     
     
 @click.command('init-db')

@@ -8,6 +8,49 @@
 {% endblock %}
 
 {% block content %}
+    <form method="get" action="{{ url_for('post.index') }}" class="search-form">
+        <div class="search-field">
+            <label for="search">Search:</label>
+            <input type="text" id="q" name="q" placeholder="Search posts..." value="{{ search_query or '' }}">
+        </div>
+
+        <div class="search-field">
+            <label for="tags">Tags:</label>
+            <input type="text" id="tags" name="tags" placeholder="Tag1, Tag2..." value="{{ search_tags|join(', ') }}">
+        </div>
+
+        <div class="search-field">
+            <label for="category">Category:</label>
+            <select id="category" name="category">
+                <option value="" {% if not search_category %} selected {% endif %}>All</option>
+                {% for category in categories %}
+                    <option value="{{ category.name }}" {% if search_category == category.name %}selected{% endif %}>
+                        {{ category.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="search-field">
+            <label for="sort">Sort by:</label>
+            <select id="sort" name="sort">
+                <option value="relevance" {% if search_sort == 'relevance' %}selected{% endif %}>Relevance</option>
+                <option value="created_at" {% if search_sort == 'created_at' %}selected{% endif %}>Date</option>
+                <option value="title" {% if search_sort == 'title' %}selected{% endif %}>Title</option>
+                <option value="popularity" {% if search_sort == 'popularity' %}selected{% endif %}>Popularity</option>
+            </select>
+        </div>
+
+        <div class="search-field">
+            <button type="submit" class="search-button">Search / Filter</button>
+        </div>
+    </form>
+
+    <hr>
+
+    {% if search_query or search_tags or search_category %}
+        <h2>Search Results</h2>
+    {% endif %}
     {% if posts %}
         <ul class="posts">
             {% for post in posts %}

@@ -6,3 +6,4 @@ PyJWT
 Werkzeug
 configparser
 python-dotenv
+Markdown

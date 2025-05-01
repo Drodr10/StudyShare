@@ -2,9 +2,13 @@ from flask import Blueprint, render_template, request, redirect, url_for, g, fla
 from werkzeug.exceptions import abort
 from datetime import datetime, timezone
 from bson.objectid import ObjectId
+import re
+import markdown
 
 from flaskr.db import get_db
 from flaskr.auth import login_required
+
+
 
 bp = Blueprint('post', __name__, url_prefix='/post')
 
@@ -12,14 +16,115 @@ bp = Blueprint('post', __name__, url_prefix='/post')
 def index():
     """
     Display all posts.
-    Order posts by creation date in descending order.
+    Allows searching by title, content, tags, and category.
+    Supports sorting by relevance, popularity, title, or created_at.
     """
+    search_query = request.args.get('q', '').strip()
+    require_all_tags = request.args.get('require_all_tags', 'false') == 'true'
+    search_tags = request.args.getlist('tags')
+    search_category = request.args.get('category', '')
+    search_sort = request.args.get('sort', 'created_at')
+    
+    mongo_query = {}
+    
+    if search_query:
+        escaped_query = re.escape(search_query)
+        mongo_query['$or'] = [
+            {'title': {'$regex': escaped_query, '$options': 'i'}},
+            {'content': {'$regex': escaped_query, '$options': 'i'}}
+        ]
+    
+    if search_tags:
+        cleaned_tags = [tag.strip() for tag in search_tags if tag.strip()]
+        if cleaned_tags:
+            if require_all_tags:
+                mongo_query['tags'] = {'$all': cleaned_tags}
+            else:
+                mongo_query['tags'] = {'$in': cleaned_tags}
+    
+    if search_category:
+        mongo_query['category'] = search_category
+    
     db = get_db()
-    posts = db.posts.find().sort('created_at', -1)
+    posts = None
+    
+    final_query = mongo_query.copy()
+    
+    if search_sort == 'relevance':
+        if search_query:
+            text_search_query = final_query.copy()
+            # $or condition CANNOT be used with $text search in MongoDB
+            text_search_query.pop('$or', None)  # Remove the $or key if it exists
+            
+            text_search_query['$text'] = {'$search': search_query}
+            
+            try:    
+                posts = db.posts.find(
+                    text_search_query, 
+                    {'score': {'$meta': 'textScore'}}
+                ).sort([('score', {'$meta': 'textScore'})])
+            except Exception as e:
+                flash(f"An error occurred while fetching posts sorted by relevance: {str(e)}")
+                try:
+                    posts = db.posts.find(mongo_query).sort('created_at', -1)
+                except Exception as e_fallback:
+                    flash(f"An error occurred while fetching posts: {str(e_fallback)}")
+                    posts = []
+        else:
+            flash("Search query is empty. Defaulting to time sort.")
+            try:
+                posts = db.posts.find(mongo_query).sort('created_at', -1)
+            except Exception as e:
+                flash(f"An error occurred while fetching posts: {str(e)}")
+                posts = []
+        
+    elif search_sort == 'popularity':
+        try:
+            posts = db.posts.aggregate([
+                {'$match': mongo_query or {}},
+                {'$lookup': {
+                    'from': 'likes',
+                    'localField': '_id',
+                    'foreignField': 'post_id',
+                    'as': 'likes'
+                }},
+                {'$addFields': {'like_count': {'$size': '$likes'}}},
+                {'$sort': {'like_count': -1}}
+            ])
+        except Exception as e:
+            flash(f"An error occurred while fetching posts sorted by popularity: {str(e)}")
+            try:
+                posts = db.posts.find(mongo_query).sort('created_at', -1)
+            except Exception as e_fallback:
+                flash(f"An error occurred while fetching posts: {str(e_fallback)}")
+                posts = []
+    
+    elif search_sort in ['title', 'created_at']:
+        try:
+            posts = db.posts.find(mongo_query).sort(search_sort, -1)
+        except Exception as e:
+            flash(f"An error occurred while fetching posts sorted by {search_sort}: {str(e)}")
+            posts = []
+    else:
+        flash("Invalid sort option. Defaulting to time sort.")
+        try:
+            posts = db.posts.find(mongo_query).sort('created_at', -1)
+        except Exception as e:
+            flash(f"An error occurred while fetching posts: {str(e)}")
+            posts = []
+    
+    search_query = request.args.get('q', '')
+    search_tags = request.args.getlist('tags')
     
     posts = [serialize_post(post) for post in posts]
     
-    return render_template('post/index.html', posts=posts)
+    return render_template('post/index.html',
+                           posts=posts,
+                           search_query=search_query,
+                           require_all_tags=require_all_tags,
+                           search_tags=search_tags,
+                           search_category=search_category,
+                           categories=list(db.categories.find()))
 
 @bp.route('/<post_id>/view', methods=('GET',))
 @login_required
@@ -58,7 +163,9 @@ def create():
                 'creator_id': g.user['user_id'],  
                 'created_at': now,
                 'updated_at': now,
-                'tags': request.form.getlist('tags') 
+                'tags': request.form.getlist('tags'),
+                'likes': 0,
+                'comments': 0 
             })
             flash('Post created successfully.')
             return redirect(url_for('post.index'))
