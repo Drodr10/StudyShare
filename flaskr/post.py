@@ -69,7 +69,7 @@ def create():
 @login_required
 def edit(post_id):
     db = get_db()
-    post = db.posts.find_one({'_id': ObjectId(post_id)})
+    post = get_post(post_id)
     
     if post is None:
         abort(404, f"Post id {post_id} doesn't exist.")
@@ -109,6 +109,36 @@ def delete(post_id):
     flash('Post deleted successfully.')
     return redirect(url_for('post.index'))
 
+@bp.route('/<post_id>/like', methods=('POST',))
+@login_required
+def like_post(post_id):
+    db = get_db()
+    post = db.posts.find_one({'_id': ObjectId(post_id)})
+    
+    if post is None:
+        abort(404, f"Post id {post_id} doesn't exist.")
+    
+    existing_like = db.likes.find_one({
+        'user_id': g.user['user_id'],
+        'post_id': post_id
+    })
+    
+    if existing_like:
+        db.likes.delete_one({
+            'user_id': g.user['user_id'],
+            'post_id': post_id
+        })
+        flash('Post unliked successfully.')
+    else:
+        db.likes.insert_one({
+            'user_id': g.user['user_id'],
+            'post_id': post_id
+        })
+
+        flash('Post liked successfully.')
+    
+    return redirect(url_for('post.view', post_id=post_id))
+
         
 
 
@@ -122,6 +152,8 @@ def serialize_post(post):
         'created_at': post['created_at'],
         'updated_at': post['updated_at'],
         'tags': post.get('tags', []),
+        'comments': post.get('comments', []),
+        'likes': post.get('likes', [])
     }
 
 def get_post(post_id, check_auth=True):
