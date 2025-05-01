@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block header %}
-    <h1>{{ post['title'] }}</h1>
+  <h1>{% block title %} {{ post['title'] }} {% endblock %}</h1>
 {% endblock %}
 
 {% block content %}
@@ -11,7 +11,7 @@
     <p><strong>Created At:</strong> {{ post['created_at'] }}</p>
     <p><strong>Updated At:</strong> {{ post['updated_at'] }}</p>
     </form>
-    <form method="post" action="{{ url_for('post.like_post', post_id=post.id) }}">
+    <form method="post" action="{{ url_for('post.like_post', post_id = post['id']) }}">
         <button type="submit">
             Like ({{ post.likes }})
         </button>

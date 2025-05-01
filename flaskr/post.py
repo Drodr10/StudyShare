@@ -235,16 +235,23 @@ def like_post(post_id):
             'user_id': g.user['user_id'],
             'post_id': post_id
         })
+        db.posts.update_one(
+            {'post_id': post_id},
+            {'$inc': {'likes': -1}}  # Decrement the like count
+        )
         flash('Post unliked successfully.')
     else:
         db.likes.insert_one({
             'user_id': g.user['user_id'],
             'post_id': post_id
         })
-
+        db.posts.update_one(
+            {'post_id': post_id},
+            {'$inc': {'likes': 1}}  # Increment the like count
+        )
         flash('Post liked successfully.')
     
-    return redirect(url_for('post.view', post_id=post_id))
+    return redirect(url_for('post.view', post_id = post_id))
 
         
 
