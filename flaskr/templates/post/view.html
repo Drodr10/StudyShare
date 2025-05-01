@@ -29,7 +29,7 @@
         <p><strong>Tags:</strong> {{ post['tags'] | join(', ') }}</p>
     {% endif %}
     <p><small>Created: {{ post.get('created_at', 'N/A') }} | Updated: {{ post.get('updated_at', 'N/A') }}</small></p>
-    <p><small>Created by: {{ post.get('username', 'Unknown User') }}</small></p>
+    <p><small>Created by: {{ creator }}</small></p>
 
     <div class="actions" style="margin-top: 15px; margin-bottom: 15px;">
         {# --- Like Button --- #}
