@@ -138,7 +138,55 @@ def view(post_id):
     if post is None:
         abort(404, f"Post id {post_id} doesn't exist.")
         
-    return render_template('post/view.html', post=serialize_post(post))
+    pipeline = [
+        {'$match': {'post_id': ObjectId(post_id)}},  # Match the specific post ID
+        {
+            '$lookup': {
+                'from': 'users',
+                'localField': 'creator_id',
+                'foreignField': '_id',
+                'as': 'creator'
+            }
+        },
+        {
+            '$unwind': {
+                'path': '$creator',
+                'preserveNullAndEmptyArrays': True  # Keep the comment even if there's no user match
+            }
+        },
+        {
+            '$sort': {'created_at': 1} 
+        },
+        {
+            '$project': {
+                '_id': 0,
+                'username': '$creator.username',
+                'content': '$comment',
+                'created_at': '$created_at',
+                'user_id': '$creator_id',
+            }
+        }
+    ]
+    
+    comments = list(db.comments.aggregate(pipeline))
+    
+    if comments:
+        for comment in comments:
+            if not comment.get('username'):
+                comment['username'] = 'Unknown User'
+            
+            comment['content'] = comment.get('content', '')
+            comment['created_at'] = comment['created_at'].astimezone().strftime('%Y-%m-%d %H:%M:%S %Z')
+            
+
+            
+    raw_content = post.get('content', '')
+    rendered_content = ''
+    if raw_content:
+        rendered_content = markdown.markdown(
+            raw_content, extensions=['fenced_code', 'codehilite', 'tables', 'extra'])    
+    
+    return render_template('post/view.html', post=serialize_post(post), comments=comments, rendered_content=rendered_content)
 
 @bp.route('/create', methods=('GET', 'POST'))
 @login_required
@@ -147,6 +195,8 @@ def create():
     if request.method == 'POST':
         title = request.form['title']
         content  = request.form['content']
+        tags = request.form['tags'].split(',')
+        tags = [tag.strip().lower() for tag in tags if tag.strip()]
         error = None
 
         if not title:
@@ -154,7 +204,7 @@ def create():
         if error is not None:
             flash(error)
         else:
-            now = datetime.now(timezone.utc).astimezone().strftime('%Y-%m-%d %H:%M:%S %Z')
+            now = datetime.now(timezone.utc)
             db.posts.insert_one({
                 'title': title,
                 'content': content,
@@ -162,7 +212,7 @@ def create():
                 'creator_id': g.user['user_id'],  
                 'created_at': now,
                 'updated_at': now,
-                'tags': [tag.strip() for tag in request.form.get('tags', '').split(',') if tag.strip()],
+                'tags': tags,
                 'likes': 0,
                 'comments': 0
             })
@@ -184,7 +234,7 @@ def edit(post_id):
         category = request.form['category']
         tags = request.form['tags'].split(',')
         
-        now = datetime.now(timezone.utc).astimezone().strftime('%Y-%m-%d %H:%M:%S %Z')
+        now = datetime.now(timezone.utc)
         db.posts.update_one(
             {'_id': ObjectId(post_id)},
             {'$set': {
@@ -239,48 +289,42 @@ def like_post(post_id):
 @login_required
 def comment_post(post_id):
     db = get_db()
-    post = db.posts.find_one({'_id': ObjectId(post_id)})
     
-    if post is None:
+    post_exists = db.posts.count_documents({'_id': ObjectId(post_id)}) > 0
+    if not post_exists:
         abort(404, f"Post id {post_id} doesn't exist.")
     
     if request.method == 'POST':
-        comment_content = request.form['comment']
+        comment_content = request.form.get('comment', '').strip()
         if not comment_content.strip():
             flash('Comment cannot be empty.')
         else:
             now = datetime.now(timezone.utc)
-            now = now.astimezone().strftime('%Y-%m-%d %H:%M:%S %Z')
-            comment = {
-                'user_id': g.user['user_id'],
-                'username': g.user['username'], 
-                'content': comment_content,
-                'created_at': now
-            }
             db.comments.insert_one({
-                'post_id': post_id,
-                'comment': comment,
+                'post_id': ObjectId(post_id),
+                'creator_id': ObjectId(g.user['user_id']),
+                'created_at': now,
+                'updated_at': now,
+                'comment': comment_content,
             })
-            db.posts.update_one(
-                {'_id': ObjectId(post_id)},
-                {'$push': {'comments': comment}}
-            )
+            db.posts.update_one({'_id': ObjectId(post_id)}, {'$inc': {'comments': 1}})
+            
             flash('Comment added successfully.')
     return redirect(url_for('post.view', post_id=post_id))
 
 def serialize_post(post):
-    return [{
+    return {
         'id': str(post['_id']),
         'title': post['title'],
         'content': post['content'],
         'category': post['category'],
         'creator_id': str(post['creator_id']),
-        'created_at': post['created_at'],
-        'updated_at': post['updated_at'],
+        'created_at': post['created_at'].astimezone().strftime('%Y-%m-%d %H:%M:%S %Z'),
+        'updated_at': post['updated_at'].astimezone().strftime('%Y-%m-%d %H:%M:%S %Z'),
         'tags': post.get('tags', []),
-        'comments': post.get('comments', []),
-        'likes': post.get('likes', [])
-    }]
+        'comments': post.get('comments', 0),
+        'likes': post.get('likes', 0),
+    }
 
 def get_post(post_id, check_auth=True):
     """
