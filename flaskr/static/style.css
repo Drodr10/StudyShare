@@ -397,3 +397,79 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 .vi { color: #19177C } /* Name.Variable.Instance */
 .vm { color: #19177C } /* Name.Variable.Magic */
 .il { color: #666 } /* Literal.Number.Integer.Long */
+
+/* --- Basic Table Styling --- */
+/* Apply only to tables inside the rendered post content */
+.post-content table {
+  border-collapse: collapse; /* Collapse borders into a single line */
+  margin: 1.5em 0;        /* Add some space above/below tables */
+  border: 1px solid #cccccc; /* Add a border around the whole table */
+  width: auto;              /* Let table size itself, or set width: 100%; */
+  font-size: 0.95em;        /* Slightly smaller font for tables */
+}
+
+.post-content th,
+.post-content td {
+  border: 1px solid #cccccc; /* Border for each cell */
+  padding: 10px 14px;       /* Padding inside cells */
+  text-align: left;         /* Default text alignment */
+}
+
+/* Style the header row */
+.post-content th {
+  background-color: #f0f0f0; /* Light grey background for header */
+  font-weight: bold;         /* Bold header text */
+}
+
+/* Optional: Add alternating row colors (zebra striping) */
+.post-content tbody tr:nth-child(even) {
+  background-color: #f8f8f8;
+}
+
+/* --- End Table Styling --- */
+
+/* --- List Styling within Rendered Markdown --- */
+/* Target lists specifically inside the post content area */
+
+.post-content ul,
+.post-content ol {
+    margin-top: 1em;      /* Add some space above/below lists */
+    margin-bottom: 1em;
+    padding-left: 40px;   /* Restore left padding for indentation (adjust px as needed) */
+                          /* Browsers use padding for markers */
+}
+
+/* Restore bullets for unordered lists */
+.post-content ul {
+    list-style-type: disc; /* Or use 'circle' or 'square' */
+}
+
+/* Restore numbers for ordered lists */
+.post-content ol {
+    list-style-type: decimal; /* Or 'lower-alpha', 'upper-roman', etc. */
+}
+
+/* Style list items */
+.post-content li {
+   margin-bottom: 0.5em; /* Add space between list items */
+   /* display: list-item; (Usually not needed, but ensures correct rendering) */
+}
+
+/* Handle nested lists */
+.post-content ul ul,
+.post-content ol ol,
+.post-content ul ol,
+.post-content ol ul {
+    margin-top: 0.5em; /* Reduce top/bottom margin for nested lists */
+    margin-bottom: 0.5em;
+}
+
+/* Optional: Style nested list markers differently */
+.post-content ul ul {
+    list-style-type: circle;
+}
+.post-content ul ul ul {
+    list-style-type: square;
+}
+
+/* --- End List Styling --- */
