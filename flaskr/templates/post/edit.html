@@ -21,12 +21,15 @@
     <input name="tags" id="tags" value="{{ request.form['tags'] or ', '.join(post['tags']) }}">
     <label for="content">Content</label>
     <textarea name="content" id="content">{{ request.form['content'] or post['content'] }}</textarea>
-    <input type="submit" value="Save">
-  </form>
+    <div style="display: flex; gap: 10px; align-items: center;">
+      <input type="submit" value="Save">
+      <form action="{{ url_for('post.delete', post_id=post['id']) }}" method="post" style="margin: 0;">
+      <input class="danger" type="submit" value="Delete" onclick="return confirm('Are you sure?');">
+      </form>
+    </div>
+    </form>
   <hr>
-  <form action="{{ url_for('post.delete', post_id=post['id']) }}" method="post">
-    <input class="danger" type="submit" value="Delete" onclick="return confirm('Are you sure?');">
+  <form action="{{ url_for('post.index') }}" method="get" style="margin: 0;">
+    <input type="submit" value="Back">
   </form>
-  <hr>
-  <p><a href="{{ url_for('post.index') }}">Back to posts</a></p>
 {% endblock %}
