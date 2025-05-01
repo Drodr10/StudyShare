@@ -7,3 +7,4 @@ Werkzeug
 configparser
 python-dotenv
 Markdown
+Pygments

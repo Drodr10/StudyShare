@@ -17,6 +17,7 @@ dependencies = [
   "configparser",
   "python-dotenv",
   "Markdown",
+  "Pygments"
 ]
 requires-python = ">=3.8"
 
