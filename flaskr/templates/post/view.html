@@ -2,41 +2,81 @@
 
 {% block header %}
   <h1>{% block title %} {{ post['title'] }} {% endblock %}</h1>
+
+  {# --- MathJax Configuration & Loading (for LaTeX) --- #}
+  {# Consider moving this to base.html <head> if math is needed elsewhere #}
+    <script>
+        MathJax = {
+          tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']],
+            displayMath: [['$$', '$$'], ['\\[', '\\]']],
+            processEscapes: true
+          },
+          svg: {
+            fontCache: 'global'
+          }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    {# --- End MathJax --- #}
 {% endblock %}
 
 {% block content %}
-    <p>{{ post['content'] }}</p>
-    <p><strong>Category:</strong> {{ post['category'] }}</p>
-    <p><strong>Tags:</strong> {{ post['tags'] | join(', ') }}</p>
-    <p><strong>Created At:</strong> {{ post['created_at'] }}</p>
-    <p><strong>Updated At:</strong> {{ post['updated_at'] }}</p>
-    </form>
-    <form method="post" action="{{ url_for('post.like_post', post_id = post['id']) }}">
-        <button type="submit">
-            Like ({{ post['likes'] }})
-        </button>
-    </form>
-    <form method="post" action="{{ url_for('post.comment_post', post_id=post['id']) }}">
-        <label for="comment">Comment here</label>
-        <input name="comment" id="comment" required>
-        <button type="submit">Comment</button>
-    </form>
+    {# --- Display Rendered Markdown/LaTeX/Highlighted Code --- #}
+    <div class="post-content markdown-body"> {# Add 'markdown-body' class for specific styling if needed #}
+        {{ rendered_content | safe }} {# Use the 'safe' filter to render the HTML #}
+    </div>
     <hr>
-    {% if post['comments'] %}
+    <p><strong>Category:</strong> {{ post.get('category', 'N/A') }}</p>
+    {% if post.get('tags') %}
+        <p><strong>Tags:</strong> {{ post['tags'] | join(', ') }}</p>
+    {% endif %}
+    <p><small>Created: {{ post.get('created_at', 'N/A') }} | Updated: {{ post.get('updated_at', 'N/A') }}</small></p>
+    <p><small>Created by: {{ post.get('username', 'Unknown User') }}</small></p>
+
+    <div class="actions" style="margin-top: 15px; margin-bottom: 15px;">
+        {# --- Like Button --- #}
+        <form method="post" action="{{ url_for('post.like_post', post_id=post['id']) }}" style="display: inline-block; margin-right: 15px;">
+            <button type="submit" class="action">
+                Like ({{ post.get('likes', 0) }})
+            </button>
+        </form>
+  
+        {# --- Display Comment Count --- #}
+         <span style="display: inline-block; vertical-align: middle;">
+             Comments: ({{ post.get('comments', 0) }}) {# Display count from post dict #}
+         </span>
+    </div>
+    
+    <hr>  
+
+    <h3>Leave a Comment</h3>
+    {# --- Comment Form --- #}
+    <form method="post" action="{{ url_for('post.comment_post', post_id=post['id']) }}">
+        <label for="comment" style="display: block; margin-bottom: 5px;">Your Comment:</label>
+        <textarea name="comment" id="comment" required rows="3" style="width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px;" placeholder="Write your comment here...">
+        </textarea>
+        <button type="submit" class="action">Comment</button>
+    </form>
+
+    <hr>
+    
+    {% if comments %}
         <h2>Comments for "{{ post['title'] }}"</h2>
         <ul class="comments">
-            {% for comment in post['comments'] %}
+            {% for comment in comments %}
                 <li>
-                    <p><strong>{{ comment['username'] }}:</strong> {{ comment['comment'] }}</p>
-                    <p><em>Posted on: {{ comment['created_at'] }}</em></p>
+                    <p><strong>{{ comment.get('username', 'Unknown User') }}:</strong> {{ comment.get('content', '') }}</p>
+                    <p><em>Posted on: {{ comment.get('created_at', 'N/A') }}</em></p>
                 </li>
-                <hr>
             {% endfor %}
         </ul>
     {% else %}
         <p>No comments yet for this post.</p>
     {% endif %}
+    
     <hr>
+    
     <form action="{{ url_for('post.index') }}" method="get" style="margin: 0;">
     <input type="submit" value="Back">
     </form>
