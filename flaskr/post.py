@@ -127,7 +127,6 @@ def index():
                            categories=list(db.categories.find()))
 
 @bp.route('/<post_id>/view', methods=('GET',))
-@login_required
 def view(post_id):
     """
     View a specific post by its ID, but only if it was not created by the current user.
@@ -137,7 +136,17 @@ def view(post_id):
 
     if post is None:
         abort(404, f"Post id {post_id} doesn't exist.")
-        
+    
+    creator = "Unknown User"
+    creator_id = post.get('creator_id')
+    if creator_id:
+        try:
+            doc = db.users.find_one({'_id': ObjectId(creator_id)})
+            if doc:
+                creator = doc.get('username', 'Unknown User')
+        except Exception as e:
+            flash(f"An error occurred while fetching the creator's username for creator_id {creator_id}: {str(e)}")
+      
     pipeline = [
         {'$match': {'post_id': ObjectId(post_id)}},  # Match the specific post ID
         {
@@ -186,7 +195,7 @@ def view(post_id):
         rendered_content = markdown.markdown(
             raw_content, extensions=['fenced_code', 'codehilite', 'tables', 'extra'])    
     
-    return render_template('post/view.html', post=serialize_post(post), comments=comments, rendered_content=rendered_content)
+    return render_template('post/view.html', post=serialize_post(post), comments=comments, rendered_content=rendered_content, creator=creator)  
 
 @bp.route('/create', methods=('GET', 'POST'))
 @login_required

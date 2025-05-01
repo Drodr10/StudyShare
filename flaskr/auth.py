@@ -163,7 +163,7 @@ def login_required(view):
     @functools.wraps(view)
     def wrapped_view(*args, **kwargs):
         if g.user is None:
-            flash("You need to be logged in to access this page.")
+            flash("You need to be logged in to perform this action.")
             return redirect_to_login()
         
         # Check if the JWT token is valid
