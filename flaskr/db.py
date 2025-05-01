@@ -68,6 +68,9 @@ def init_db():
     db.comments.create_index([('post_id', 1)])
     db.comments.create_index([('creator_id', 1)])
     db.comments.create_index([('content', 1)])
+    db.comments.create_index([('created_at', 1)])
+    db.comments.create_index([('updated_at', 1)])
+    db.comments.create_index([('likes', 1)])  # For furture use
 
     if 'likes' not in db.list_collection_names():
         db.create_collection('likes')
