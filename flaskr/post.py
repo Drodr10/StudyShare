@@ -35,7 +35,7 @@ def index():
         ]
     
     if search_tags:
-        cleaned_tags = [tag.strip() for tag in search_tags if tag.strip()]
+        cleaned_tags = [tag.strip().lower() for tag in search_tags if tag.strip()]
         if cleaned_tags:
             if require_all_tags:
                 mongo_query['tags'] = {'$all': cleaned_tags}
@@ -154,18 +154,17 @@ def create():
         if error is not None:
             flash(error)
         else:
-            now = datetime.now(timezone.utc)
-            now = now.astimezone().strftime('%Y-%m-%d %H:%M:%S %Z')
+            now = datetime.now(timezone.utc).astimezone().strftime('%Y-%m-%d %H:%M:%S %Z')
             db.posts.insert_one({
                 'title': title,
                 'content': content,
-                'category': request.form.get('category', 'Uncategorized'),
+                'category': request.form.get('category', 'General'),
                 'creator_id': g.user['user_id'],  
                 'created_at': now,
                 'updated_at': now,
-                'tags': request.form.getlist('tags'),
+                'tags': [tag.strip() for tag in request.form.get('tags', '').split(',') if tag.strip()],
                 'likes': 0,
-                'comments': 0 
+                'comments': 0
             })
             flash('Post created successfully.')
             return redirect(url_for('post.index'))
@@ -178,10 +177,6 @@ def edit(post_id):
     db = get_db()
     post = get_post(post_id)
     
-    if post is None:
-        abort(404, f"Post id {post_id} doesn't exist.")
-    if post['creator_id'] != g.user['user_id']:
-        abort(403, "You do not have permission to edit this post.")
     
     if request.method == 'POST':
         title = request.form['title']
@@ -189,8 +184,7 @@ def edit(post_id):
         category = request.form['category']
         tags = request.form['tags'].split(',')
         
-        now = datetime.now(timezone.utc)
-        now = now.astimezone().strftime('%Y-%m-%d %H:%M:%S %Z')
+        now = datetime.now(timezone.utc).astimezone().strftime('%Y-%m-%d %H:%M:%S %Z')
         db.posts.update_one(
             {'_id': ObjectId(post_id)},
             {'$set': {
@@ -203,7 +197,7 @@ def edit(post_id):
         )
         flash('Post updated successfully.')
         return redirect(url_for('post.index'))
-    return render_template('post/edit.html', post=serialize_post(post), categories=list(db.categories.find()))
+    return render_template('post/edit.html', post=post, categories=list(db.categories.find()))
 
 @bp.route('/<post_id>/delete', methods=('POST',))
 @login_required
@@ -239,9 +233,6 @@ def like_post(post_id):
         flash('Post liked successfully.')
     
     return redirect(url_for('post.view', post_id = post_id))
-
-        
-
 
 def serialize_post(post):
     return {
