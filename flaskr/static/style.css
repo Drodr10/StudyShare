@@ -270,3 +270,37 @@ hr {
     width: 100%;
   }
 }
+
+/* === Styling for Markdown Rendered Content === */
+
+.post-content pre { /* Target <pre> elements likely wrapping code blocks */
+  background-color: #f4f4f8; /* Light grey background */
+  border: 1px solid #ddd;    /* Subtle border */
+  border-radius: 6px;       /* Rounded corners */
+  padding: 1em;             /* Padding inside the block */
+  overflow-x: auto;         /* Add horizontal scroll for long lines */
+  font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace; /* Monospaced font */
+  font-size: 0.9em;         /* Slightly smaller font size */
+  margin: 1em 0;            /* Add some space around the block */
+}
+
+.post-content code { /* Target inline <code> elements */
+  background-color: #e8e8ee; /* Slightly different background for inline code */
+  padding: 0.2em 0.4em;     /* Small padding */
+  border-radius: 3px;       /* Rounded corners */
+  font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace; /* Monospaced font */
+  font-size: 0.9em;
+}
+
+/* Ensure <pre><code> has the same styling as <pre> if nested */
+.post-content pre code {
+    background-color: transparent; /* Avoid double background */
+    border: none;
+    padding: 0;
+    font-size: inherit; /* Inherit font size from <pre> */
+}
+
+/* MathJax SVG adjustments if needed */
+.post-content mjx-container svg {
+    display: inline-block; /* Ensure MathJax renders correctly inline */
+}
