@@ -56,7 +56,6 @@
             {% for post in posts %}
                 <li>
                     <h3><a href="{{ url_for('post.view', post_id=post.id) }}">{{ post.title }}</a></h3>
-                    <p>{{ post.content }}</p>
                     {% if g.user and g.user.user_id == post.creator_id %}
                         <form method="get" action="{{ url_for('post.edit', post_id=post.id) }}" style="display:inline;">
                             <button type="submit" class="edit">Edit</button>
