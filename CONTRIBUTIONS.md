@@ -13,7 +13,12 @@ This file outlines work on tasks not directly reflected in source code commits, 
 ## Xavier Ruiz
 
 * **Date:** Mid-April 2025 **Task:** Verified cross-platform compatibility by setting up the project environment and testing core functionality within Windows Subsystem for Linux (Ubuntu).
+* **Date:** April 28th, 2025 **Task:** Learned HTML and Flask to assist with creating unique template files for the website.
+* **Date:** April 28-30th, 2025 **Task:** Looked over documentation while creating the project and offered ideas throughout
+to assist with proper execution of the website.
+
+
 
 ## Joint Contributions (Diego Rodriguez & Xavier Ruiz)
 
-* **Date:** Approx. April 18th, 2025 - **Task:** Discussed and redistributed project development tasks following a reduction in team size.
+* **Date:** Approx. April 18th, 2025 - **Task:** Discussed and redistributed project development tasks following a reduction in team size
