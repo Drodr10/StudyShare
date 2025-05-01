@@ -16,6 +16,26 @@
             Like ({{ post.likes }})
         </button>
     </form>
+    <form method="post" action="{{ url_for('post.comment_post', post_id=post['id']) }}">
+        <label for="comment">Comment here</label>
+        <input name="comment" id="comment" required>
+        <button type="submit">Comment</button>
+    </form>
+    <hr>
+    {% if post['comments'] %}
+        <h2>Comments for "{{ post['title'] }}"</h2>
+        <ul class="comments">
+            {% for comment in post['comments'] %}
+                <li>
+                    <p><strong>{{ comment['username'] }}:</strong> {{ comment['comment'] }}</p>
+                    <p><em>Posted on: {{ comment['created_at'] }}</em></p>
+                </li>
+                <hr>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No comments yet for this post.</p>
+    {% endif %}
     <hr>
     <form action="{{ url_for('post.index') }}" method="get" style="margin: 0;">
     <input type="submit" value="Back">

@@ -253,11 +253,42 @@ def like_post(post_id):
     
     return redirect(url_for('post.view', post_id = post_id))
 
-        
 
+@bp.route('/<post_id>/comment', methods=('POST', 'GET'))
+@login_required
+def comment_post(post_id):
+    db = get_db()
+    post = db.posts.find_one({'_id': ObjectId(post_id)})
+    
+    if post is None:
+        abort(404, f"Post id {post_id} doesn't exist.")
+    
+    if request.method == 'POST':
+        comment_content = request.form['comment']
+        if not comment_content.strip():
+            flash('Comment cannot be empty.')
+        else:
+            now = datetime.now(timezone.utc)
+            now = now.astimezone().strftime('%Y-%m-%d %H:%M:%S %Z')
+            comment = {
+                'user_id': g.user['user_id'],
+                'username': g.user['username'], 
+                'content': comment_content,
+                'created_at': now
+            }
+            db.comments.insert_one({
+                'post_id': post_id,
+                'comment': comment,
+            })
+            db.posts.update_one(
+                {'_id': ObjectId(post_id)},
+                {'$push': {'comments': comment}}
+            )
+            flash('Comment added successfully.')
+    return redirect(url_for('post.view', post_id=post_id))
 
 def serialize_post(post):
-    return {
+    return [{
         'id': str(post['_id']),
         'title': post['title'],
         'content': post['content'],
@@ -268,7 +299,7 @@ def serialize_post(post):
         'tags': post.get('tags', []),
         'comments': post.get('comments', []),
         'likes': post.get('likes', [])
-    }
+    }]
 
 def get_post(post_id, check_auth=True):
     """
