@@ -9,7 +9,7 @@ description = "The note sharing app for Markdown (.md) files!"
 readme = "README.md"
 dependencies = [
   "Flask",
-  "pymongo[srv]",
+  "pymongo",
   "pytest",
   "pytest-cov",
   "PyJWT",
