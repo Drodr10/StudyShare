@@ -1,5 +1,5 @@
 Flask
-pymongo[srv]
+pymongo
 pytest
 pytest-cov
 PyJWT
