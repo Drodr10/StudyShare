@@ -8,8 +8,18 @@
   <form method="post">
     <label for="title">Title</label>
     <input name="title" id="title" value="{{ request.form['title'] }}" required>
-    <label for="body">Body</label>
-    <textarea name="body" id="body">{{ request.form['body'] }}</textarea>
+    <label for="catgory">Category</label>
+    <select name="category" id="category">
+      {% for category in categories %}
+        <option value="{{ category['name'] }}" {% if request.form['category'] == category['name'] %}selected{% endif %}>
+          {{ category['name'] }}
+        </option>
+      {% endfor %}
+    </select>
+    <label for="tags">Tags (comma seperated)</label>
+    <input name="tags" id="tags" value="{{ request.form['tags'] or ', '.join(request.form['tags']) }}">
+    <label for="content">Content</label>
+    <textarea name="content" id="=content">{{ request.form['content'] }}</textarea>
     <input type="submit" value="Save">
   </form>
 {% endblock %}
