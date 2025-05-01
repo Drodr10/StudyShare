@@ -47,19 +47,25 @@ def login():
             elif not check_password_hash(user['password'], password):
                 error = "Incorrect password."
             
-            # Generate a JWT token
-            token = jwt.encode({
-                "username": username,
-                "exp": datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=1)
-            }, current_app.config['JWT_SECRET_KEY'], algorithm='HS256')
+            if error is None:
+                # Check if the user is already logged in
+                if session.get('logged_in'):
+                    flash("You are already logged in.")
+                    return redirect(url_for('post.index'))
+                # Generate a JWT token
+                token = jwt.encode({
+                    "username": username,
+                    "exp": datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=1)
+                }, current_app.config['JWT_SECRET_KEY'], algorithm='HS256')
+                
+                # Store the token in the session
+                session.clear()
+                session['jwt_token'] = token
+                session['username'] = user['username']
+                session['user_id'] = str(user['_id'])
+                session['logged_in'] = True
+                return redirect(url_for('post.index'))    
             
-            # Store the token in the session
-            session.clear()
-            session['jwt_token'] = token
-            session['username'] = user['username']
-            session['user_id'] = str(user['_id'])
-            session['logged_in'] = True
-            return redirect(url_for('post.index'))
         
         flash(error)
         

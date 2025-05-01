@@ -225,30 +225,17 @@ def like_post(post_id):
     if post is None:
         abort(404, f"Post id {post_id} doesn't exist.")
     
-    existing_like = db.likes.find_one({
-        'user_id': g.user['user_id'],
-        'post_id': post_id
-    })
+    like = db.likes.find_one({'post_id': ObjectId(post_id), 'user_id': g.user['user_id']})
     
-    if existing_like:
-        db.likes.delete_one({
-            'user_id': g.user['user_id'],
-            'post_id': post_id
-        })
-        db.posts.update_one(
-            {'post_id': post_id},
-            {'$inc': {'likes': -1}}  # Decrement the like count
-        )
+    if like:
+        # User already liked the post, so remove the like
+        db.likes.delete_one({'post_id': ObjectId(post_id), 'user_id': g.user['user_id']})
+        db.posts.update_one({'_id': ObjectId(post_id)}, {'$inc': {'likes': -1}})
         flash('Post unliked successfully.')
     else:
-        db.likes.insert_one({
-            'user_id': g.user['user_id'],
-            'post_id': post_id
-        })
-        db.posts.update_one(
-            {'post_id': post_id},
-            {'$inc': {'likes': 1}}  # Increment the like count
-        )
+        # User has not liked the post yet, so add the like
+        db.likes.insert_one({'post_id': ObjectId(post_id), 'user_id': g.user['user_id']})
+        db.posts.update_one({'_id': ObjectId(post_id)}, {'$inc': {'likes': 1}})
         flash('Post liked successfully.')
     
     return redirect(url_for('post.view', post_id = post_id))

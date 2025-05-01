@@ -13,7 +13,7 @@
     </form>
     <form method="post" action="{{ url_for('post.like_post', post_id = post['id']) }}">
         <button type="submit">
-            Like ({{ post.likes }})
+            Like ({{ post['likes'] }})
         </button>
     </form>
     <form method="post" action="{{ url_for('post.comment_post', post_id=post['id']) }}">
