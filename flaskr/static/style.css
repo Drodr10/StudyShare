@@ -102,7 +102,11 @@ section.content .action:hover {
 }
 
 section.content .edit {
-  background-color: #0077cc
+  background-color: #0077cc;
+  color: white;
+  padding: 8px 16px;
+  font-size: 0.9em;
+  border-radius: 6px;
 }
 
 section.content .edit:hover {
@@ -111,6 +115,10 @@ section.content .edit:hover {
 
 section.content .delete {
   background-color: #dc3545;
+  color: white;
+  padding: 8px 16px;
+  font-size: 0.9em;
+  border-radius: 6px;
 }
 section.content .delete:hover {
   background-color: #b02a37;
